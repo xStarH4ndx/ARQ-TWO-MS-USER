@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package auth;
+
+message Auth {
+  string id = 1; // Identificador único
+  string email = 2; // Correo electrónico
+  string password = 3; // Contraseña
+  bool isVerified = 4; // Verificación de cuenta
+  string resetToken = 5; // Token de restablecimiento
+  string resetTokenExpiration = 6; // Expiración del token de restablecimiento
+}
+
+service AuthService {
+  rpc Register(Auth) returns (Auth); // Registro de usuario
+  rpc Login(Auth) returns (Auth); // Inicio de sesión
+  rpc VerifyEmail(Auth) returns (Auth); // Verificación de correo
+  rpc ResetPassword(Auth) returns (Auth); // Restablecimiento de contraseña
+}

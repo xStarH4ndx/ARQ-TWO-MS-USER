@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+package users;
+
+// ==================== MENSAJES ====================
+
+message User {
+  string id = 1;
+  string nombre = 2;
+  string apellido = 3;
+  string email = 4;
+  string password = 5;
+  string access_token = 6;
+  string refresh_token = 7;
+  string createdAt = 8;
+  string updatedAt = 9;
+}
+
+message CreateUserRequest {
+  string nombre = 1;
+  string apellido = 2;
+  string email = 3;
+  string password = 4;
+}
+
+message UpdateUserRequest {
+  string id = 1;
+  string nombre = 2;
+  string apellido = 3;
+  string email = 4;
+  string password = 5;
+  string access_token = 6;
+  string refresh_token = 7;
+}
+
+message FindOneUserRequest {
+  string id = 1;
+}
+
+message FindUserByEmailRequest {
+  string email = 1;
+}
+
+message RemoveUserRequest {
+  string id = 1;
+}
+
+message FindAllUsersRequest {
+  int32 limit = 1;
+  int32 offset = 2;
+}
+
+message UsersResponse {
+  repeated User users = 1;
+  int32 total = 2;
+}
+
+message SearchUsersByNameRequest {
+  string name = 1;
+  int32 limit = 2;
+}
+
+message SearchUsersByNameResponse {
+  repeated User users = 1;
+}
+
+message UserExistsRequest {
+  string id = 1;
+}
+
+message UserExistsResponse {
+  bool exists = 1;
+}
+
+message GetUserStatsRequest {}
+
+message GetUserStatsResponse {
+  int32 totalUsers = 1;
+  int32 recentUsers = 2;
+}
+
+message SuccessResponse {
+  bool success = 1;
+}
+
+message Empty {}
+
+// ==================== SERVICIO ====================
+
+service UsersService {
+  // CRUD básico
+  rpc CreateUser(CreateUserRequest) returns (User);
+  rpc FindAllUsers(FindAllUsersRequest) returns (UsersResponse);
+  rpc FindOneUser(FindOneUserRequest) returns (User);
+  rpc FindUserByEmail(FindUserByEmailRequest) returns (User);
+  rpc UpdateUser(UpdateUserRequest) returns (User);
+  rpc RemoveUser(RemoveUserRequest) returns (SuccessResponse);
+  
+  // Métodos adicionales
+  rpc SearchUsersByName(SearchUsersByNameRequest) returns (SearchUsersByNameResponse);
+  rpc GetUserStats(GetUserStatsRequest) returns (GetUserStatsResponse);
+  rpc UserExists(UserExistsRequest) returns (UserExistsResponse);
+}

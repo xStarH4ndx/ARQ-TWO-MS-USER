@@ -1,0 +1,148 @@
+syntax = "proto3";
+
+package houses;
+
+// ==================== MENSAJES ====================
+
+message House {
+  string id = 1;
+  string nombre = 2;
+  string descripcion = 3;
+  string codigo = 4;
+  repeated string userIds = 5;
+  string createdAt = 6;
+  string updatedAt = 7;
+}
+
+message CreateHouseRequest {
+  string nombre = 1;
+  string descripcion = 2;
+  string codigo = 3;
+  repeated string userIds = 4;
+}
+
+message UpdateHouseRequest {
+  string id = 1;
+  string nombre = 2;
+  string descripcion = 3;
+  string codigo = 4;
+  repeated string userIds = 5;
+}
+
+message FindOneHouseRequest {
+  string id = 1;
+}
+
+message FindHouseByCodeRequest {
+  string codigo = 1;
+}
+
+message RemoveHouseRequest {
+  string id = 1;
+}
+
+message FindAllHousesRequest {
+  int32 limit = 1;
+  int32 offset = 2;
+}
+
+message HousesResponse {
+  repeated House houses = 1;
+  int32 total = 2;
+}
+
+// ==================== MENSAJES PARA GESTIÓN DE USUARIOS ====================
+
+message AddUserToHouseRequest {
+  string houseId = 1;
+  string userId = 2;
+}
+
+message RemoveUserFromHouseRequest {
+  string houseId = 1;
+  string userId = 2;
+}
+
+message GetUsersInHouseRequest {
+  string houseId = 1;
+}
+
+message GetUsersInHouseResponse {
+  repeated string userIds = 1;
+}
+
+message GetHousesByUserRequest {
+  string userId = 1;
+}
+
+message GetHousesByUserResponse {
+  repeated House houses = 1;
+}
+
+message IsUserInHouseRequest {
+  string houseId = 1;
+  string userId = 2;
+}
+
+message IsUserInHouseResponse {
+  bool isInHouse = 1;
+}
+
+// ==================== MENSAJES ADICIONALES ====================
+
+message SearchHousesByNameRequest {
+  string name = 1;
+  int32 limit = 2;
+}
+
+message SearchHousesByNameResponse {
+  repeated House houses = 1;
+}
+
+message HouseExistsRequest {
+  string id = 1;
+}
+
+message HouseExistsResponse {
+  bool exists = 1;
+}
+
+message GetHouseStatsRequest {}
+
+message GetHouseStatsResponse {
+  int32 totalHouses = 1;
+  int32 recentHouses = 2;
+  int32 housesWithUsers = 3;
+  int32 housesWithoutUsers = 4;
+  double averageUsersPerHouse = 5;
+}
+
+message SuccessResponse {
+  bool success = 1;
+}
+
+message Empty {}
+
+// ==================== SERVICIO ====================
+
+service HousesService {
+  // CRUD básico
+  rpc CreateHouse(CreateHouseRequest) returns (House);
+  rpc FindAllHouses(FindAllHousesRequest) returns (HousesResponse);
+  rpc FindOneHouse(FindOneHouseRequest) returns (House);
+  rpc FindHouseByCode(FindHouseByCodeRequest) returns (House);
+  rpc UpdateHouse(UpdateHouseRequest) returns (House);
+  rpc RemoveHouse(RemoveHouseRequest) returns (SuccessResponse);
+  
+  // Gestión de usuarios en casas
+  rpc AddUserToHouse(AddUserToHouseRequest) returns (House);
+  rpc RemoveUserFromHouse(RemoveUserFromHouseRequest) returns (House);
+  rpc GetUsersInHouse(GetUsersInHouseRequest) returns (GetUsersInHouseResponse);
+  rpc GetHousesByUser(GetHousesByUserRequest) returns (GetHousesByUserResponse);
+  rpc IsUserInHouse(IsUserInHouseRequest) returns (IsUserInHouseResponse);
+  
+  // Métodos adicionales
+  rpc SearchHousesByName(SearchHousesByNameRequest) returns (SearchHousesByNameResponse);
+  rpc GetHouseStats(GetHouseStatsRequest) returns (GetHouseStatsResponse);
+  rpc HouseExists(HouseExistsRequest) returns (HouseExistsResponse);
+}
