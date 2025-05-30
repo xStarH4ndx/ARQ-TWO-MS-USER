@@ -2,188 +2,179 @@ syntax = "proto3";
 
 package users;
 
-service UserService {
-
-  rpc CreateUserProfile(CreateUserProfileRequest) returns (CreateUserProfileResponse);
-  rpc GetUser(GetUserRequest) returns (GetUserResponse);
-  rpc GetUserByAuthId(GetUserByAuthIdRequest) returns (GetUserByAuthIdResponse);
-  rpc GetUserByEmail(GetUserByEmailRequest) returns (GetUserByEmailResponse);
-  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
-  rpc UpdateUserByAuthId(UpdateUserByAuthIdRequest) returns (UpdateUserByAuthIdResponse);
-  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
-  rpc DeleteUserByAuthId(DeleteUserByAuthIdRequest) returns (DeleteUserByAuthIdResponse);
+service UsersService {
+  // Crear perfil de usuario
+  rpc CreateUserProfile(CreateUserRequest) returns (CreateUserResponse);
   
-  // Búsquedas y listados
-  rpc GetAllUsers(GetAllUsersRequest) returns (GetAllUsersResponse);
+  // Buscar usuarios
+  rpc FindAllUsers(FindAllUsersRequest) returns (FindAllUsersResponse);
+  rpc FindOneUser(FindOneUserRequest) returns (FindOneUserResponse);
+  rpc FindByAuthId(FindByAuthIdRequest) returns (FindByAuthIdResponse);
+  rpc FindByEmail(FindByEmailRequest) returns (FindByEmailResponse);
+  
+  // Actualizar usuarios
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+  rpc UpdateByAuthId(UpdateByAuthIdRequest) returns (UpdateByAuthIdResponse);
+  
+  // Eliminar usuarios
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+  rpc DeleteByAuthId(DeleteByAuthIdRequest) returns (DeleteByAuthIdResponse);
+  
+  // Búsquedas especiales
   rpc SearchUsersByName(SearchUsersByNameRequest) returns (SearchUsersByNameResponse);
   rpc GetUserStats(GetUserStatsRequest) returns (GetUserStatsResponse);
   
-  // Verificaciones
+  // Verificar existencia
   rpc UserExists(UserExistsRequest) returns (UserExistsResponse);
   rpc UserExistsByAuthId(UserExistsByAuthIdRequest) returns (UserExistsByAuthIdResponse);
 }
 
-// Mensajes de Request
-message CreateUserProfileRequest {
-  string authId = 1;
-  string firstName = 2;
-  string lastName = 3;
-  string email = 4;
-}
-
-message GetUserRequest {
-  string id = 1;
-}
-
-message GetUserByAuthIdRequest {
-  string authId = 1;
-}
-
-message GetUserByEmailRequest {
-  string email = 1;
-}
-
-message UpdateUserRequest {
-  string id = 1;
-}
-
-message UpdateUserByAuthIdRequest {
-  string authId = 1;
-}
-
-message DeleteUserRequest {
-  string id = 1;
-}
-
-message DeleteUserByAuthIdRequest {
-  string authId = 1;
-}
-
-message GetAllUsersRequest {
-  optional int32 limit = 1;
-  optional int32 offset = 2;
-}
-
-message SearchUsersByNameRequest {
-  string name = 1;
-  optional int32 limit = 2;
-}
-
-message GetUserStatsRequest {
-  // Vacío por ahora, se puede extender
-}
-
-message UserExistsRequest {
-  string id = 1;
-}
-
-message UserExistsByAuthIdRequest {
-  string authId = 1;
-}
-
-// Mensajes de Response
-message CreateUserProfileResponse {
-  bool success = 1;
-  string message = 2;
-  User data = 3;
-  string error = 4;
-}
-
-message GetUserResponse {
-  bool success = 1;
-  string message = 2;
-  User data = 3;
-  string error = 4;
-}
-
-message GetUserByAuthIdResponse {
-  bool success = 1;
-  string message = 2;
-  User data = 3;
-  string error = 4;
-}
-
-message GetUserByEmailResponse {
-  bool success = 1;
-  string message = 2;
-  User data = 3;
-  string error = 4;
-}
-
-message UpdateUserResponse {
-  bool success = 1;
-  string message = 2;
-  User data = 3;
-  string error = 4;
-}
-
-message UpdateUserByAuthIdResponse {
-  bool success = 1;
-  string message = 2;
-  User data = 3;
-  string error = 4;
-}
-
-message DeleteUserResponse {
-  bool success = 1;
-  string message = 2;
-  string error = 3;
-}
-
-message DeleteUserByAuthIdResponse {
-  bool success = 1;
-  string message = 2;
-  string error = 3;
-}
-
-message GetAllUsersResponse {
-  bool success = 1;
-  string message = 2;
-  repeated User users = 3;
-  int32 total = 4;
-  string error = 5;
-}
-
-message SearchUsersByNameResponse {
-  bool success = 1;
-  string message = 2;
-  repeated User users = 3;
-  string error = 4;
-}
-
-message GetUserStatsResponse {
-  bool success = 1;
-  string message = 2;
-  UserStats data = 3;
-  string error = 4;
-}
-
-message UserExistsResponse {
-  bool success = 1;
-  bool exists = 2;
-  string error = 3;
-}
-
-message UserExistsByAuthIdResponse {
-  bool success = 1;
-  bool exists = 2;
-  string error = 3;
-}
-
-// Tipos de datos
+// Mensaje User basado en tu entidad
 message User {
   string id = 1;
   string authId = 2;
   string firstName = 3;
   string lastName = 4;
   string email = 5;
-  bool isActive = 17;
-  optional string lastLogin = 18;
-  string createdAt = 19;
-  string updatedAt = 20;
+  bool isActive = 6;
+  string lastLogin = 7;  // ISO string format
+  string createdAt = 8;  // ISO string format
+  string updatedAt = 9;  // ISO string format
 }
 
-message UserStats {
+// Mensajes para datos de actualización
+message UpdateUserData {
+  optional string firstName = 1;
+  optional string lastName = 2;
+  optional string email = 3;
+  optional bool isActive = 4;
+  optional string lastLogin = 5;
+}
+
+// Create User Profile
+message CreateUserRequest {
+  string authId = 1;
+  string firstName = 2;
+  string lastName = 3;
+  string email = 4;
+}
+
+message CreateUserResponse {
+  User user = 1;
+}
+
+// Find All Users
+message FindAllUsersRequest {
+  optional int32 limit = 1;
+  optional int32 offset = 2;
+}
+
+message FindAllUsersResponse {
+  repeated User users = 1;
+  int32 total = 2;
+}
+
+// Find One User
+message FindOneUserRequest {
+  string id = 1;
+}
+
+message FindOneUserResponse {
+  User user = 1;
+}
+
+// Find By Auth ID
+message FindByAuthIdRequest {
+  string authId = 1;
+}
+
+message FindByAuthIdResponse {
+  User user = 1;
+  bool found = 2;
+}
+
+// Find By Email
+message FindByEmailRequest {
+  string email = 1;
+}
+
+message FindByEmailResponse {
+  User user = 1;
+  bool found = 2;
+}
+
+// Update User
+message UpdateUserRequest {
+  string id = 1;
+  UpdateUserData updateData = 2;
+}
+
+message UpdateUserResponse {
+  User user = 1;
+}
+
+// Update By Auth ID
+message UpdateByAuthIdRequest {
+  string authId = 1;
+  UpdateUserData updateData = 2;
+}
+
+message UpdateByAuthIdResponse {
+  User user = 1;
+}
+
+// Delete User
+message DeleteUserRequest {
+  string id = 1;
+}
+
+message DeleteUserResponse {
+  bool success = 1;
+}
+
+// Delete By Auth ID
+message DeleteByAuthIdRequest {
+  string authId = 1;
+}
+
+message DeleteByAuthIdResponse {
+  bool success = 1;
+}
+
+// Search Users By Name
+message SearchUsersByNameRequest {
+  string name = 1;
+  optional int32 limit = 2;
+}
+
+message SearchUsersByNameResponse {
+  repeated User users = 1;
+}
+
+// Get User Stats
+message GetUserStatsRequest {
+  // Empty - no parameters needed
+}
+
+message GetUserStatsResponse {
   int32 totalUsers = 1;
   int32 recentUsers = 2;
+}
+
+// User Exists
+message UserExistsRequest {
+  string id = 1;
+}
+
+message UserExistsResponse {
+  bool exists = 1;
+}
+
+// User Exists By Auth ID
+message UserExistsByAuthIdRequest {
+  string authId = 1;
+}
+
+message UserExistsByAuthIdResponse {
+  bool exists = 1;
 }
