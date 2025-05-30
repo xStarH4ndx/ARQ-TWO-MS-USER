@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { GrpcMethod } from '@nestjs/microservices';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
@@ -12,8 +12,8 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @MessagePattern('auth.register')
-  async register(@Payload() createAuthDto: CreateAuthDto) {
+  @GrpcMethod('AuthService', 'Register')
+  async register(createAuthDto: CreateAuthDto) {
     try {
       return await this.authService.create(createAuthDto);
     } catch (error) {
@@ -25,8 +25,8 @@ export class AuthController {
     }
   }
 
-  @MessagePattern('auth.login')
-  async login(@Payload() loginAuthDto: LoginAuthDto) {
+  @GrpcMethod('AuthService', 'Login')
+  async login(loginAuthDto: LoginAuthDto) {
     try {
       return await this.authService.login(loginAuthDto);
     } catch (error) {
@@ -38,8 +38,8 @@ export class AuthController {
     }
   }
 
-  @MessagePattern('auth.verify-email')
-  async verifyEmail(@Payload() verifyEmailDto: VerifyEmailDto) {
+  @GrpcMethod('AuthService', 'VerifyEmail')
+  async verifyEmail(verifyEmailDto: VerifyEmailDto) {
     try {
       return await this.authService.verifyEmail(verifyEmailDto);
     } catch (error) {
@@ -51,8 +51,8 @@ export class AuthController {
     }
   }
 
-  @MessagePattern('auth.forgot-password')
-  async forgotPassword(@Payload() forgotPasswordDto: ForgotPasswordDto) {
+  @GrpcMethod('AuthService', 'ForgotPassword')
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
     try {
       return await this.authService.forgotPassword(forgotPasswordDto);
     } catch (error) {
@@ -64,8 +64,8 @@ export class AuthController {
     }
   }
 
-  @MessagePattern('auth.reset-password')
-  async resetPassword(@Payload() resetPasswordDto: ResetPasswordDto) {
+  @GrpcMethod('AuthService', 'ResetPassword')
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
     try {
       return await this.authService.resetPassword(resetPasswordDto);
     } catch (error) {
@@ -77,8 +77,39 @@ export class AuthController {
     }
   }
 
-  @MessagePattern('auth.findAll')
-  async findAll() {
+  @GrpcMethod('AuthService', 'ValidateUser')
+  async validateUser(data: { email: string; password: string }) {
+    try {
+      const user = await this.authService.validateUser(data.email, data.password);
+      return {
+        success: !!user,
+        data: user,
+        message: user ? 'User validated successfully' : 'Invalid credentials',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message,
+        error: error.name,
+      };
+    }
+  }
+
+  @GrpcMethod('AuthService', 'ValidateToken')
+  async validateToken(data: { token: string }) {
+    try {
+      return await this.authService.validateToken(data.token);
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message,
+        error: error.name,
+      };
+    }
+  }
+
+  @GrpcMethod('AuthService', 'FindAllUsers')
+  async findAllUsers() {
     try {
       return await this.authService.findAll();
     } catch (error) {
@@ -90,8 +121,8 @@ export class AuthController {
     }
   }
 
-  @MessagePattern('auth.findOne')
-  async findOne(@Payload() data: { id: string }) {
+  @GrpcMethod('AuthService', 'FindOneUser')
+  async findOneUser(data: { id: string }) {
     try {
       return await this.authService.findOne(data.id);
     } catch (error) {
@@ -103,8 +134,8 @@ export class AuthController {
     }
   }
 
-  @MessagePattern('auth.findByEmail')
-  async findByEmail(@Payload() data: { email: string }) {
+  @GrpcMethod('AuthService', 'FindUserByEmail')
+  async findUserByEmail(data: { email: string }) {
     try {
       return await this.authService.findByEmail(data.email);
     } catch (error) {
@@ -116,10 +147,11 @@ export class AuthController {
     }
   }
 
-  @MessagePattern('auth.update')
-  async update(@Payload() data: { id: string; updateAuthDto: UpdateAuthDto }) {
+  @GrpcMethod('AuthService', 'UpdateUser')
+  async updateUser(data: { id: string } & UpdateAuthDto) {
     try {
-      return await this.authService.update(data.id, data.updateAuthDto);
+      const { id, ...updateData } = data;
+      return await this.authService.update(id, updateData);
     } catch (error) {
       return {
         success: false,
@@ -129,28 +161,10 @@ export class AuthController {
     }
   }
 
-  @MessagePattern('auth.remove')
-  async remove(@Payload() data: { id: string }) {
+  @GrpcMethod('AuthService', 'RemoveUser')
+  async removeUser(data: { id: string }) {
     try {
       return await this.authService.remove(data.id);
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message,
-        error: error.name,
-      };
-    }
-  }
-
-  @MessagePattern('auth.validate-user')
-  async validateUser(@Payload() data: { email: string; password: string }) {
-    try {
-      const user = await this.authService.validateUser(data.email, data.password);
-      return {
-        success: !!user,
-        data: user,
-        message: user ? 'User validated successfully' : 'Invalid credentials',
-      };
     } catch (error) {
       return {
         success: false,
