@@ -289,4 +289,91 @@ export class AuthService {
     }
     return null;
   }
+
+    async validateToken(token: string) {
+    try {
+      const payload = this.jwtService.verify(token);
+      
+      // Verificar que el usuario aún existe y está activo
+      const user = await this.authModel.findById(payload.sub);
+      if (!user || !user.isVerified) {
+        throw new UnauthorizedException('Invalid token - user not found or not verified');
+      }
+
+      return {
+        success: true,
+        message: 'Token is valid',
+        data: {
+          sub: payload.sub,
+          email: payload.email,
+          iat: payload.iat,
+          exp: payload.exp,
+        },
+      };
+    } catch (error) {
+      if (error.name === 'JsonWebTokenError') {
+        throw new UnauthorizedException('Invalid token format');
+      }
+      if (error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token has expired');
+      }
+      throw new UnauthorizedException('Token validation failed');
+    }
+  }
+
+
+
+    async getUserFromToken(token: string) {
+    try {
+      const payload = this.jwtService.verify(token);
+      const user = await this.authModel.findById(payload.sub).select('-password');
+      
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      return {
+        success: true,
+        data: user,
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
+
+
+  async refreshToken(oldToken: string) {
+    try {
+      const payload = this.jwtService.verify(oldToken);
+      const user = await this.authModel.findById(payload.sub);
+      
+      if (!user || !user.isVerified) {
+        throw new UnauthorizedException('Cannot refresh token');
+      }
+
+      const newPayload = { sub: user._id, email: user.email };
+      const newToken = this.jwtService.sign(newPayload);
+
+      return {
+        success: true,
+        message: 'Token refreshed successfully',
+        data: {
+          access_token: newToken,
+          user: {
+            id: user._id,
+            email: user.email,
+            isVerified: user.isVerified,
+          },
+        },
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Cannot refresh token');
+    }
+  }
+
+
+
+
 }
+
+
