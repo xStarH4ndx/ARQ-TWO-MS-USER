@@ -1,0 +1,170 @@
+syntax = "proto3";
+
+package auth;
+
+service AuthService {
+  // Registro de usuario
+  rpc Register(RegisterRequest) returns (AuthResponse);
+  
+  // Login de usuario
+  rpc Login(LoginRequest) returns (LoginResponse);
+  
+  // Verificación de email
+  rpc VerifyEmail(VerifyEmailRequest) returns (BaseResponse);
+  
+  // Solicitar reset de contraseña
+  rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse);
+  
+  // Resetear contraseña
+  rpc ResetPassword(ResetPasswordRequest) returns (BaseResponse);
+  
+  // Validar usuario (para otros microservicios)
+  rpc ValidateUser(ValidateUserRequest) returns (ValidateUserResponse);
+  
+  // Validar token JWT
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+  
+  // CRUD Operations
+  rpc FindAllUsers(Empty) returns (UsersResponse);
+  rpc FindOneUser(FindOneRequest) returns (UserResponse);
+  rpc FindUserByEmail(FindByEmailRequest) returns (UserResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (UserResponse);
+  rpc RemoveUser(RemoveUserRequest) returns (BaseResponse);
+}
+
+// Mensajes de Request
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+  optional bool isVerified = 3;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message VerifyEmailRequest {
+  string token = 1;
+}
+
+message ForgotPasswordRequest {
+  string email = 1;
+}
+
+message ResetPasswordRequest {
+  string token = 1;
+  string newPassword = 2;
+}
+
+message ValidateUserRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+message FindOneRequest {
+  string id = 1;
+}
+
+message FindByEmailRequest {
+  string email = 1;
+}
+
+message UpdateUserRequest {
+  string id = 1;
+  optional string email = 2;
+  optional string password = 3;
+  optional bool isVerified = 4;
+  optional string resetToken = 5;
+  optional string resetTokenExpiration = 6;
+}
+
+message RemoveUserRequest {
+  string id = 1;
+}
+
+message Empty {}
+
+// Mensajes de Response
+message BaseResponse {
+  bool success = 1;
+  string message = 2;
+  optional string error = 3;
+}
+
+message AuthResponse {
+  bool success = 1;
+  string message = 2;
+  optional string error = 3;
+  optional User data = 4;
+  optional string verificationToken = 5;
+}
+
+message LoginResponse {
+  bool success = 1;
+  string message = 2;
+  optional string error = 3;
+  optional LoginData data = 4;
+}
+
+message LoginData {
+  string access_token = 1;
+  User user = 2;
+}
+
+message ForgotPasswordResponse {
+  bool success = 1;
+  string message = 2;
+  optional string error = 3;
+  optional string resetToken = 4;
+}
+
+message ValidateUserResponse {
+  bool success = 1;
+  string message = 2;
+  optional string error = 3;
+  optional User data = 4;
+}
+
+message ValidateTokenResponse {
+  bool success = 1;
+  string message = 2;
+  optional string error = 3;
+  optional TokenPayload data = 4;
+}
+
+message UserResponse {
+  bool success = 1;
+  string message = 2;
+  optional string error = 3;
+  optional User data = 4;
+}
+
+message UsersResponse {
+  bool success = 1;
+  string message = 2;
+  optional string error = 3;
+  repeated User data = 4;
+}
+
+// Entidades
+message User {
+  string id = 1;
+  string email = 2;
+  bool isVerified = 3;
+  optional string resetToken = 4;
+  optional string resetTokenExpiration = 5;
+  optional string createdAt = 6;
+  optional string updatedAt = 7;
+}
+
+message TokenPayload {
+  string sub = 1;
+  string email = 2;
+  int64 iat = 3;
+  int64 exp = 4;
+}
