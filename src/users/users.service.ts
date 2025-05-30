@@ -11,11 +11,13 @@ export class UsersService {
     @InjectModel(User.name) private userModel: Model<UserDocument>
   ) {}
 
-  async create(createUserData: CreateUserDto): Promise<User> {
+  // Crear perfil de usuario después del registro exitoso en auth
+  async createUserProfile(createUserData: CreateUserDto & { authId: string }): Promise<User> {
     try {
-      const existingUser = await this.userModel.findOne({ email: createUserData.email }).exec();
-      if (existingUser) {
-        throw new ConflictException(`User with email ${createUserData.email} already exists`);
+      // Verificar que no exista ya un perfil para este authId
+      const existingProfile = await this.userModel.findOne({ authId: createUserData.authId }).exec();
+      if (existingProfile) {
+        throw new ConflictException(`User profile for authId ${createUserData.authId} already exists`);
       }
 
       const createdUser = new this.userModel(createUserData);
@@ -82,6 +84,21 @@ export class UsersService {
     }
   }
 
+  async findByAuthId(authId: string): Promise<User | null> {
+    try {
+      if (!Types.ObjectId.isValid(authId)) {
+        throw new BadRequestException('Invalid auth ID format');
+      }
+      
+      return await this.userModel.findOne({ authId }).exec();
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException('Error finding user by auth ID');
+    }
+  }
+
   async findByEmail(email: string): Promise<User | null> {
     try {
       if (!email || !this.isValidEmail(email)) {
@@ -103,6 +120,7 @@ export class UsersService {
         throw new BadRequestException('Invalid user ID format');
       }
 
+      // Si se actualiza el email, validar que no exista en otros perfiles
       if (updateUserData.email) {
         const existingUser = await this.userModel.findOne({ 
           email: updateUserData.email,
@@ -142,6 +160,53 @@ export class UsersService {
     }
   }
 
+  // Actualizar por authId (útil después de validar token)
+  async updateByAuthId(authId: string, updateUserData: Partial<UpdateUserDto>): Promise<User> {
+    try {
+      if (!Types.ObjectId.isValid(authId)) {
+        throw new BadRequestException('Invalid auth ID format');
+      }
+
+      const user = await this.userModel.findOne({ authId });
+      if (!user) {
+        throw new NotFoundException(`User profile for authId ${authId} not found`);
+      }
+
+      if (updateUserData.email) {
+        const existingUser = await this.userModel.findOne({ 
+          email: updateUserData.email,
+          authId: { $ne: authId } 
+        }).exec();
+        
+        if (existingUser) {
+          throw new ConflictException(`Email ${updateUserData.email} is already in use`);
+        }
+      }
+
+      const updatedUser = await this.userModel.findOneAndUpdate(
+        { authId }, 
+        updateUserData, 
+        { 
+          new: true,           
+          runValidators: true  
+        }
+      ).exec();
+
+      return updatedUser!;
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException || error instanceof ConflictException) {
+        throw error;
+      }
+      
+      if (error.name === 'ValidationError') {
+        const errorMessages = Object.values(error.errors).map((err: any) => err.message);
+        throw new BadRequestException(`Validation failed: ${errorMessages.join(', ')}`);
+      }
+      
+      throw new BadRequestException('Error updating user');
+    }
+  }
+
   async remove(id: string): Promise<void> {
     try {
       if (!Types.ObjectId.isValid(id)) {
@@ -158,6 +223,26 @@ export class UsersService {
         throw error;
       }
       throw new BadRequestException('Error deleting user');
+    }
+  }
+
+  // Eliminar perfil por authId
+  async removeByAuthId(authId: string): Promise<void> {
+    try {
+      if (!Types.ObjectId.isValid(authId)) {
+        throw new BadRequestException('Invalid auth ID format');
+      }
+
+      const deletedUser = await this.userModel.findOneAndDelete({ authId }).exec();
+      
+      if (!deletedUser) {
+        throw new NotFoundException(`User profile for authId ${authId} not found`);
+      }
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException('Error deleting user profile');
     }
   }
 
@@ -201,6 +286,19 @@ export class UsersService {
       }
       
       const user = await this.userModel.findById(id).select('_id').exec();
+      return !!user;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  async existsByAuthId(authId: string): Promise<boolean> {
+    try {
+      if (!Types.ObjectId.isValid(authId)) {
+        return false;
+      }
+      
+      const user = await this.userModel.findOne({ authId }).select('_id').exec();
       return !!user;
     } catch (error) {
       return false;

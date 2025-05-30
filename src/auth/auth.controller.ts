@@ -108,69 +108,69 @@ export class AuthController {
     }
   }
 
-  @GrpcMethod('AuthService', 'FindAllUsers')
-  async findAllUsers() {
-    try {
-      return await this.authService.findAll();
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message,
-        error: error.name,
-      };
-    }
-  }
+  // @GrpcMethod('AuthService', 'FindAllUsers')
+  // async findAllUsers() {
+  //   try {
+  //     return await this.authService.findAll();
+  //   } catch (error) {
+  //     return {
+  //       success: false,
+  //       message: error.message,
+  //       error: error.name,
+  //     };
+  //   }
+  // }
 
-  @GrpcMethod('AuthService', 'FindOneUser')
-  async findOneUser(data: { id: string }) {
-    try {
-      return await this.authService.findOne(data.id);
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message,
-        error: error.name,
-      };
-    }
-  }
+  // @GrpcMethod('AuthService', 'FindOneUser')
+  // async findOneUser(data: { id: string }) {
+  //   try {
+  //     return await this.authService.findOne(data.id);
+  //   } catch (error) {
+  //     return {
+  //       success: false,
+  //       message: error.message,
+  //       error: error.name,
+  //     };
+  //   }
+  // }
 
-  @GrpcMethod('AuthService', 'FindUserByEmail')
-  async findUserByEmail(data: { email: string }) {
-    try {
-      return await this.authService.findByEmail(data.email);
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message,
-        error: error.name,
-      };
-    }
-  }
+  // @GrpcMethod('AuthService', 'FindUserByEmail')
+  // async findUserByEmail(data: { email: string }) {
+  //   try {
+  //     return await this.authService.findByEmail(data.email);
+  //   } catch (error) {
+  //     return {
+  //       success: false,
+  //       message: error.message,
+  //       error: error.name,
+  //     };
+  //   }
+  // }
 
-  @GrpcMethod('AuthService', 'UpdateUser')
-  async updateUser(data: { id: string } & UpdateAuthDto) {
-    try {
-      const { id, ...updateData } = data;
-      return await this.authService.update(id, updateData);
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message,
-        error: error.name,
-      };
-    }
-  }
+  // @GrpcMethod('AuthService', 'UpdateUser')
+  // async updateUser(data: { id: string } & UpdateAuthDto) {
+  //   try {
+  //     const { id, ...updateData } = data;
+  //     return await this.authService.update(id, updateData);
+  //   } catch (error) {
+  //     return {
+  //       success: false,
+  //       message: error.message,
+  //       error: error.name,
+  //     };
+  //   }
+  // }
 
-  @GrpcMethod('AuthService', 'RemoveUser')
-  async removeUser(data: { id: string }) {
-    try {
-      return await this.authService.remove(data.id);
-    } catch (error) {
-      return {
-        success: false,
-        message: error.message,
-        error: error.name,
-      };
-    }
-  }
+  // @GrpcMethod('AuthService', 'RemoveUser')
+  // async removeUser(data: { id: string }) {
+  //   try {
+  //     return await this.authService.remove(data.id);
+  //   } catch (error) {
+  //     return {
+  //       success: false,
+  //       message: error.message,
+  //       error: error.name,
+  //     };
+  //   }
+  // }
 }
