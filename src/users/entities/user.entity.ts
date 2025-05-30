@@ -1,64 +1,68 @@
+// entities/user.entity.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
-import * as bcrypt from 'bcrypt';
+import { Document, Types } from 'mongoose';
 
 export type UserDocument = User & Document;
 
-@Schema({ timestamps: true })
+@Schema({ 
+  timestamps: true,
+  toJSON: {
+    transform: function(doc, ret) {
+      ret.id = ret._id;
+      delete ret._id;
+      delete ret.__v;
+      return ret;
+    }
+  }
+})
 export class User {
-  @Prop({ required: true, maxlength: 100 })
-  nombre: string;
+  @Prop({ 
+    type: Types.ObjectId, 
+    required: true, 
+    unique: true,
+    index: true,
+    ref: 'Auth' 
+  })
+  authId: Types.ObjectId;
 
-  @Prop({ required: true, maxlength: 100 })
-  apellido: string;
+  @Prop({ 
+    required: true, 
+    trim: true,
+    minLength: 2,
+    maxLength: 50
+  })
+  firstName: string;
 
-  @Prop({ required: true, unique: true, lowercase: true })
+  @Prop({ 
+    required: true, 
+    trim: true,
+    minLength: 2,
+    maxLength: 50
+  })
+  lastName: string;
+
+  @Prop({ 
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
+    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
+  })
   email: string;
 
-  @Prop({ required: true })
-  password: string;
+  @Prop({ 
+    default: true 
+  })
+  isActive: boolean;
 
-  @Prop()
-  access_token?: string;
+  @Prop({ 
+    default: Date.now 
+  })
+  lastLogin?: Date;
 
-  @Prop()
-  refresh_token?: string;
 
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
-
-UserSchema.pre('save', async function(next) {
-  const user = this as UserDocument;
-  
-  if (!user.isModified('password')) return next();
-  
-  try {
-    const saltRounds = 12;
-    const hashedPassword = await bcrypt.hash(user.password, saltRounds);
-    user.password = hashedPassword;
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
-
-UserSchema.pre('findOneAndUpdate', async function(next) {
-  const update = this.getUpdate() as any;
-  
-  if (update.password) {
-    try {
-      const saltRounds = 12;
-      update.password = await bcrypt.hash(update.password, saltRounds);
-    } catch (error) {
-      return next(error);
-    }
-  }
-  next();
-});
-
-UserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
-  return bcrypt.compare(candidatePassword, this.password);
-};
