@@ -10,8 +10,8 @@ interface MessageDTO {
 }
 
 @Controller()
-export class HouseListener {
-  private readonly logger = new Logger(HouseListener.name);
+export class HousesListener {
+  private readonly logger = new Logger(HousesListener.name);
 
   constructor(private readonly houseService: HousesService) {}
 
