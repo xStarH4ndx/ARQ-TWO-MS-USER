@@ -164,39 +164,39 @@ export class HousesService {
 
   // ==================== MÉTODOS ESPECÍFICOS PARA GESTIÓN DE USUARIOS ====================
 
-  async addUserToHouse(houseId: string, userId: string): Promise<Houses> {
-    try {
-      if (!Types.ObjectId.isValid(houseId)) {
-        throw new BadRequestException('Invalid house ID format');
-      }
-
-      if (!Types.ObjectId.isValid(userId)) {
-        throw new BadRequestException('Invalid user ID format');
-      }
-
-      const house = await this.houseModel.findById(houseId).exec();
-      if (!house) {
-        throw new NotFoundException(`House with ID ${houseId} not found`);
-      }
-
-      if (house.userIds.includes(userId)) {
-        throw new ConflictException(`User ${userId} is already in this house`);
-      }
-
-      const updatedHouse = await this.houseModel.findByIdAndUpdate(
-        houseId,
-        { $push: { userIds: userId } },
-        { new: true, runValidators: true }
-      ).exec();
-
-      return updatedHouse!;
-    } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException || error instanceof ConflictException) {
-        throw error;
-      }
-      throw new BadRequestException('Error adding user to house');
+async addUserToHouse(codigo: string, userId: string, nombre: string): Promise<Houses> {
+  try {
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid user ID format');
     }
+
+    const house = await this.houseModel.findOne({ 
+      nombre: nombre, 
+      codigo: codigo 
+    }).exec();
+    
+    if (!house) {
+      throw new NotFoundException(`House with name "${nombre}" and code "${codigo}" not found`);
+    }
+
+    if (house.userIds.includes(userId)) {
+      throw new ConflictException(`User ${userId} is already in this house`);
+    }
+
+    const updatedHouse = await this.houseModel.findByIdAndUpdate(
+      house._id,
+      { $push: { userIds: userId } },
+      { new: true, runValidators: true }
+    ).exec();
+
+    return updatedHouse!;
+  } catch (error) {
+    if (error instanceof NotFoundException || error instanceof BadRequestException || error instanceof ConflictException) {
+      throw error;
+    }
+    throw new BadRequestException('Error adding user to house');
   }
+}
 
   async removeUserFromHouse(houseId: string, userId: string): Promise<Houses> {
     try {
