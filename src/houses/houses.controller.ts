@@ -46,6 +46,11 @@ export class HousesController {
     return this.housesService.addUserToHouse(data.codigo, data.userId, data.nombre);
   }
 
+  @GrpcMethod('HousesService', 'AddUserToHouseById')
+  async addUserToHouseById(data: { houseId: string; userId: string }): Promise<any> {
+    return this.housesService.addUserToHouseById(data.houseId, data.userId);
+  }
+
   @GrpcMethod('HousesService', 'RemoveUserFromHouse')
   async removeUserFromHouse(data: { houseId: string; userId: string }): Promise<any> {
     return this.housesService.removeUserFromHouse(data.houseId, data.userId);
