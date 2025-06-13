@@ -3,12 +3,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { HousesService } from './houses.service';
 import { HousesController } from './houses.controller';
 import { Houses, HousesSchema } from './entities/house.entity';
-import { HousesListener } from './houses.listener';
+import { HouseListener } from './houses.listener';
 
 @Module({
   imports: [MongooseModule.forFeature([{ name: Houses.name, schema: HousesSchema }])],
   controllers: [HousesController],
-  providers: [HousesService, HousesListener],
+  providers: [HousesService, HouseListener],
   exports: [HousesService],
 })
 export class HousesModule {}
