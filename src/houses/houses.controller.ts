@@ -42,8 +42,13 @@ export class HousesController {
   // ==================== MÉTODOS PARA GESTIÓN DE USUARIOS EN CASAS ====================
 
   @GrpcMethod('HousesService', 'AddUserToHouse')
-  async addUserToHouse(data: { houseId: string; userId: string }): Promise<any> {
-    return this.housesService.addUserToHouse(data.houseId, data.userId);
+  async addUserToHouse(data: { codigo: string; userId: string; nombre: string}): Promise<any> {
+    return this.housesService.addUserToHouse(data.codigo, data.userId, data.nombre);
+  }
+
+  @GrpcMethod('HousesService', 'AddUserToHouseById')
+  async addUserToHouseById(data: { houseId: string; userId: string }): Promise<any> {
+    return this.housesService.addUserToHouseById(data.houseId, data.userId);
   }
 
   @GrpcMethod('HousesService', 'RemoveUserFromHouse')
