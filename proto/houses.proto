@@ -121,6 +121,16 @@ message SuccessResponse {
   bool success = 1;
 }
 
+message AddUserToHouseByIdRequest {
+  string house_id = 1;
+  string user_id = 2;
+}
+
+message AddUserToHouseByIdResponse {
+  bool success = 1;
+  string message = 2;
+}
+
 message Empty {}
 
 // ==================== SERVICIO ====================
@@ -136,6 +146,7 @@ service HousesService {
   
   // Gestión de usuarios en casas
   rpc AddUserToHouse(AddUserToHouseRequest) returns (House);
+  rpc AddUserToHouseById(AddUserToHouseByIdRequest) returns (AddUserToHouseByIdResponse);
   rpc RemoveUserFromHouse(RemoveUserFromHouseRequest) returns (House);
   rpc GetUsersInHouse(GetUsersInHouseRequest) returns (GetUsersInHouseResponse);
   rpc GetHousesByUser(GetHousesByUserRequest) returns (GetHousesByUserResponse);
