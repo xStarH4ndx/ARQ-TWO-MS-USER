@@ -8,28 +8,24 @@ import { rabbitmqConfig } from './rabbitmq/rabbitmq.config';
 async function bootstrap() {
   dotenv.config();
 
+  // Crear la aplicación Nest estándar
   const app = await NestFactory.create(AppModule);
 
-  // Rutas de los proto
-  const userProtoPath = join(__dirname, '../proto/users.proto');
-  const housesProtoPath = join(__dirname, '../proto/houses.proto');
-  const authProtoPath = join(__dirname, '../proto/auth.proto');
-
-  console.log('Users Proto Path:', userProtoPath);
-  console.log('Houses Proto Path:', housesProtoPath);
-  console.log('Auth Proto Path:', authProtoPath);
-
-  // Microservicio gRPC
+  // Conectar gRPC como microservicio
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.GRPC,
     options: {
       package: ['users', 'houses', 'auth'],
-      protoPath: [userProtoPath, housesProtoPath, authProtoPath],
+      protoPath: [
+        join(__dirname, '../proto/users.proto'),
+        join(__dirname, '../proto/houses.proto'),
+        join(__dirname, '../proto/auth.proto'),
+      ],
       url: '0.0.0.0:5000',
     },
   });
 
-  // Microservicio RabbitMQ
+  // Conectar RabbitMQ como segundo microservicio
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
