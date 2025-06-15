@@ -1,50 +1,38 @@
-# --- STAGE 1: Build Stage ---
-# Usamos Node.js 22. Si tu proyecto necesita una versión diferente, cámbiala aquí.
-FROM node:22-alpine AS build
+# Usa una imagen base de Node.js adecuada (ej. LTS)
+# FROM node:20-alpine # Si usas Node.js 20
+FROM node:22-alpine
 
 # Establecer el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
 # Copiar package.json y package-lock.json para instalar dependencias
-# Esto optimiza el uso del caché de Docker: si solo cambia el código, no se reinstalan dependencias.
+# Esto optimiza el uso del caché de Docker
 COPY package*.json ./
 
-# Instalar todas las dependencias (incluidas las de desarrollo necesarias para la compilación)
+# Instalar TODAS las dependencias (incluyendo devDependencies si las necesitas para el inicio/pruebas en dev)
 RUN npm install
 
-# Copiar el resto del código fuente del proyecto
+# Copiar el resto del código fuente de tu proyecto.
+# En desarrollo, generalmente quieres todo el código fuente.
 COPY . .
 
-# Compilar la aplicación NestJS
-# Esto generará los archivos de JavaScript en la carpeta 'dist'
-RUN npm run build
-
-# --- STAGE 2: Production Stage ---
-# Usar una imagen base más ligera para la producción
-FROM node:22-alpine AS production
-
-# Establecer el directorio de trabajo
-WORKDIR /app
-
-# Copiar solo los package.json para instalar las dependencias de producción
-COPY package*.json ./
-
-# Instalar solo las dependencias de producción (excluyendo las de desarrollo)
-RUN npm install --omit=dev
-
-# Copiar el código compilado desde la etapa de construcción
-# La carpeta 'dist' contiene tu aplicación NestJS compilada
-COPY --from=build /app/dist ./dist
-
 # Exponer el puerto que usa tu microservicio.
-# Un microservicio NestJS GRPC o con Microservices usa por defecto diferentes puertos.
-# Si tu servicio de usuario tiene un puerto HTTP, o un puerto específico para gRPC/RabbitMQ
-# (diferente al 3000 por defecto de NestJS HTTP), AJÚSTALO AQUÍ.
-# Si solo es un microservicio GRPC o de RabbitMQ sin un puerto HTTP expuesto,
-# es posible que no necesites EXPOSE aquí, o que sea un puerto específico para gRPC.
-# Por ahora, usaré un placeholder, deberías verificar la configuración de tu microservicio.
+# Para desarrollo, el puerto que expongas dependerá de cómo lo uses.
+# Si es un microservicio GRPC o de RabbitMQ, es posible que no "expongas" un puerto HTTP tradicional
+# o que necesites un puerto específico para esos protocolos.
+# Ajusta este puerto al que tu 'ms-users' realmente esté escuchando si es HTTP,
+# o si necesitas mapear un puerto para GRPC/RabbitMQ.
+# Por defecto, NestJS puede usar 3000 si tiene una capa HTTP/GraphQL.
 EXPOSE 5000
 
-# Comando para ejecutar la aplicación NestJS en producción
-# Tu package.json tiene 'start:prod': "node dist/main"
-CMD ["npm", "run", "start:prod"]
+# Comando para ejecutar la aplicación NestJS en desarrollo.
+# Tu package.json probablemente tiene un script 'start:dev'.
+# Si el script 'start:dev' ejecuta 'nest start --watch', es ideal para desarrollo.
+CMD ["npm", "run", "start:dev"]
+
+# Notas adicionales para desarrollo con este Dockerfile:
+# - Este Dockerfile de una sola etapa será más grande que una imagen de producción optimizada
+#   porque incluye todas las dependencias de desarrollo y el código fuente completo.
+# - Es para facilidad de desarrollo/pruebas locales, no para un despliegue optimizado en producción.
+# - Asegúrate de que tu script 'start:dev' de 'ms-users' sea apropiado para iniciar
+#   el microservicio en un contenedor.
