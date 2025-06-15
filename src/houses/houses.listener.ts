@@ -10,8 +10,8 @@ interface MessageDTO {
 }
 
 @Controller()
-export class HouseListener {
-  private readonly logger = new Logger(HouseListener.name);
+export class HousesListener {
+  private readonly logger = new Logger(HousesListener.name);
 
   constructor(private readonly houseService: HousesService) {}
 
@@ -29,13 +29,13 @@ export class HouseListener {
 
       switch (action) {
         case 'getHouseById':
-          const houseId = body?.houseId;
-          if (!houseId) {
+          const casaId = body?.casaId;
+          if (!casaId) {
             this.logger.warn('Falta el campo houseId en body');
             return null;
           }
 
-          const house = await this.houseService.findOne(houseId);
+          const house = await this.houseService.findOne(casaId);
           this.logger.log(`Casa encontrada: ${JSON.stringify(house)}`);
           return house;
           
