@@ -5,5 +5,5 @@ export class CreateHouseDto {
 
     codigo: string;
 
-    userIds: string[];
+    userIds?: string[];
 }
