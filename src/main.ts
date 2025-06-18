@@ -21,7 +21,7 @@ async function bootstrap() {
         join(__dirname, '../proto/houses.proto'),
         join(__dirname, '../proto/auth.proto'),
       ],
-      url: '0.0.0.0:5000',
+      url: 'apigateway:5000',
     },
   });
 
